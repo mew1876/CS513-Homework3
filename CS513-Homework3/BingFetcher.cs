@@ -11,27 +11,32 @@ namespace CS513_Homework3
 
         static void Main(string[] args)
         {
-            Image image = getTile("http://h0.ortho.tiles.virtualearth.net/tiles/a023131022213211200.jpeg?g=131");
+            Bitmap image = getTile("http://h0.ortho.tiles.virtualearth.net/tiles/a023131022213211200.jpeg?g=131");
             image.Save("tileImage.jpg");
         }
 
-        static Image getTile(string URI)
+        static List<string> getQuadsInBB(double latitude, double longitude)
         {
-            Image image = null;
+
+        }
+
+        static Bitmap getTile(string URI)
+        {
+            Bitmap image = null;
             Task get = getTileAsync(URI).ContinueWith(x => image = x.Result);
             get.Wait();
             return image;
         }
 
-        static async Task<Image> getTileAsync(string URI)
+        static async Task<Bitmap> getTileAsync(string URI)
         {
-            Image image = null;
+            Bitmap image = null;
             HttpResponseMessage response = await client.GetAsync(URI);
             if(response.IsSuccessStatusCode)
             {
                 byte[] bytes = await response.Content.ReadAsByteArrayAsync();
                 MemoryStream stream = new MemoryStream(bytes);
-                image = Image.FromStream(stream);
+                image = new Bitmap(Image.FromStream(stream));
             }
             return image;
         }
