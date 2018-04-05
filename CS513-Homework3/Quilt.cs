@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Microsoft.MapPoint;
+using System;
 using System.Drawing;
+using System.Drawing.Imaging;
 
 /// <summary>
 /// Bitmap class that has methods which consist of "stitching"/placing images next to each other to make one big image
@@ -9,30 +11,36 @@ public class Quilt
     private Bitmap quilt;
     private Graphics graphics;
 
-	public Quilt(double minLatitude, double minLongitude, double maxLatitude, double maxLongitude, int levelOfDetail = 23)
-	{
-		//Create an empty image of appropriate size - see TileSystem
-	}
+    private int originX;
+    private int originY;
 
-    public void add(Bitmap image)
-    {
-        //Draw image over the correct part of the quilt - see Graphics
+    private int maxLevelOfDetail;
+
+	public Quilt(double latitude1, double longitude1, double latitude2, double longitude2, int maxLevelOfDetail = 23)
+	{
+        int pixelX1, pixelX2, pixelY1, pixelY2;
+        TileSystem.LatLongToPixelXY(latitude1, longitude1, maxLevelOfDetail, out pixelX1, out pixelY1);
+        TileSystem.LatLongToPixelXY(latitude2, longitude2, maxLevelOfDetail, out pixelX2, out pixelY2);
+
+        quilt = new Bitmap(Math.Abs(pixelX1 - pixelX2), Math.Abs(pixelY1 - pixelY2), PixelFormat.Format24bppRgb);
+        graphics = Graphics.FromImage(quilt);
+
+        originX = Math.Min(pixelX1, pixelX2);
+        originY = Math.Min(pixelY1, pixelY2);
+
+        this.maxLevelOfDetail = maxLevelOfDetail;
     }
 
-    public Bitmap getImage()
+    public void Add(Bitmap image, string quadKey)
+    {
+        int tileX, tileY, levelOfDetail;
+        TileSystem.QuadKeyToTileXY(quadKey, out tileX, out tileY, out levelOfDetail);
+        uint relativeScale = TileSystem.MapSize(maxLevelOfDetail - levelOfDetail);
+        graphics.DrawImage(image, tileX * (int)relativeScale - originX, tileY * (int)relativeScale - originY, image.Width * (int)relativeScale, image.Height * (int)relativeScale);
+    }
+
+    public Bitmap GetImage()
     {
         return quilt;
-    }
-
-    private Bitmap GlueHorizontally(Bitmap leftImage, Bitmap rightImage)
-    {
-        //To be removed - use as reference
-        Bitmap finalImage = new Bitmap(leftImage.Width + rightImage.Width, Math.Max(leftImage.Height, rightImage.Height));
-        using (Graphics g = Graphics.FromImage(finalImage))
-        {
-            g.DrawImage(leftImage, 0, 0);
-            g.DrawImage(rightImage, leftImage.Width, 0);
-        }
-        return finalImage;
     }
 }

@@ -15,11 +15,6 @@ namespace CS513_Homework3
             image.Save("tileImage.jpg");
         }
 
-        static List<string> getQuadsInBB(double latitude, double longitude)
-        {
-
-        }
-
         static Bitmap getTile(string URI)
         {
             Bitmap image = null;
