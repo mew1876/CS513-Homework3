@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Net.Http;
 using System.IO;
 
@@ -11,23 +12,39 @@ namespace CS513_Homework3
 
         static void Main(string[] args)
         {
-            Bitmap image = GetTile("http://h0.ortho.tiles.virtualearth.net/tiles/a023131022213211200.jpeg?g=131");
-            image.Save("tileImage.jpg");
+            //Bitmap image = GetImageInBB(41.78, -87.7, 41.783, -87.705);
+            Bitmap image = GetImageInBB(41, -87, 41.0001, -87.0001);
+            image.Save("test.png", ImageFormat.Png);
         }
 
-        static void GetImageInBB(double minLatitude, double minLongitude, double maxLatitude, double maxLongitude, Quilt targetQuilt)
+        static Bitmap GetImageInBB(double latitude1, double longitude1, double latitude2, double longitude2)
         {
-            RecursivelyGetImageinBB(minLatitude, minLongitude, maxLatitude, maxLongitude, targetQuilt, "");
-            return;
+            Quilt quilt = new Quilt(latitude1, longitude1, latitude2, longitude2, 15);
+            RecursivelyGetImageinBB(latitude1, longitude1, latitude2, longitude2, quilt, "", 0);
+            return quilt.GetImage();
         }
 
-        static void RecursivelyGetImageinBB(double minLatitude, double minLongitude, double maxLatitude, double maxLongitude, Quilt targetQuilt, string quadKey)
+        static void RecursivelyGetImageinBB(double latitude1, double longitude1, double latitude2, double longitude2, Quilt targetQuilt, string quadKey, int levelOfDetail)
         {
-            targetQuilt.Add(GetTile("http://h0.ortho.tiles.virtualearth.net/tiles/a" + quadKey + ".jpeg?g=131"), quadKey); // TODO: DRAW CURRENT quadKey ONTO THE RETURN IMAGE (has to be before recursion)
-            RecursivelyGetImageinBB(minLatitude, minLongitude, maxLatitude, maxLongitude, targetQuilt, quadKey += "0");
-            RecursivelyGetImageinBB(minLatitude, minLongitude, maxLatitude, maxLongitude, targetQuilt, quadKey += "1");
-            RecursivelyGetImageinBB(minLatitude, minLongitude, maxLatitude, maxLongitude, targetQuilt, quadKey += "2");
-            RecursivelyGetImageinBB(minLatitude, minLongitude, maxLatitude, maxLongitude, targetQuilt, quadKey += "3");
+            if(quadKey.Length > 0)
+            {
+                Bitmap tileImage = GetTile("http://h0.ortho.tiles.virtualearth.net/tiles/a" + quadKey + ".jpeg?g=131");
+                if (tileImage == null)
+                {
+                    return;
+                }
+                targetQuilt.Add(tileImage, quadKey);
+                if(levelOfDetail >= targetQuilt.getMaxLevelOfDetail())
+                {
+                    return;
+                }
+            }
+            levelOfDetail++;
+
+            RecursivelyGetImageinBB(latitude1, longitude1, latitude2, longitude2, targetQuilt, quadKey + "0", levelOfDetail);
+            RecursivelyGetImageinBB(latitude1, longitude1, latitude2, longitude2, targetQuilt, quadKey + "1", levelOfDetail);
+            RecursivelyGetImageinBB(latitude1, longitude1, latitude2, longitude2, targetQuilt, quadKey + "2", levelOfDetail);
+            RecursivelyGetImageinBB(latitude1, longitude1, latitude2, longitude2, targetQuilt, quadKey + "3", levelOfDetail);
         }
 
         static Bitmap GetTile(string URI)

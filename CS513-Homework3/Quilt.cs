@@ -18,11 +18,10 @@ public class Quilt
 
 	public Quilt(double latitude1, double longitude1, double latitude2, double longitude2, int maxLevelOfDetail = 23)
 	{
-        int pixelX1, pixelX2, pixelY1, pixelY2;
-        TileSystem.LatLongToPixelXY(latitude1, longitude1, maxLevelOfDetail, out pixelX1, out pixelY1);
-        TileSystem.LatLongToPixelXY(latitude2, longitude2, maxLevelOfDetail, out pixelX2, out pixelY2);
+        TileSystem.LatLongToPixelXY(latitude1, longitude1, maxLevelOfDetail, out int pixelX1, out int pixelY1);
+        TileSystem.LatLongToPixelXY(latitude2, longitude2, maxLevelOfDetail, out int pixelX2, out int pixelY2);
 
-        quilt = new Bitmap(Math.Abs(pixelX1 - pixelX2), Math.Abs(pixelY1 - pixelY2), PixelFormat.Format24bppRgb);
+        quilt = new Bitmap(Math.Abs(pixelX1 - pixelX2), Math.Abs(pixelY1 - pixelY2));
         graphics = Graphics.FromImage(quilt);
 
         originX = Math.Min(pixelX1, pixelX2);
@@ -33,14 +32,19 @@ public class Quilt
 
     public void Add(Bitmap image, string quadKey)
     {
-        int tileX, tileY, levelOfDetail;
-        TileSystem.QuadKeyToTileXY(quadKey, out tileX, out tileY, out levelOfDetail);
+        TileSystem.QuadKeyToTileXY(quadKey, out int tileX, out int tileY, out int levelOfDetail);
         uint relativeScale = TileSystem.MapSize(maxLevelOfDetail - levelOfDetail);
+        //Console.WriteLine(tileX * (int)relativeScale - originX);
         graphics.DrawImage(image, tileX * (int)relativeScale - originX, tileY * (int)relativeScale - originY, image.Width * (int)relativeScale, image.Height * (int)relativeScale);
     }
 
     public Bitmap GetImage()
     {
         return quilt;
+    }
+
+    public int getMaxLevelOfDetail()
+    {
+        return maxLevelOfDetail;
     }
 }
