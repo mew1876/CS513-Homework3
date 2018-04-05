@@ -35,7 +35,7 @@ public class Quilt
         TileSystem.QuadKeyToTileXY(quadKey, out int tileX, out int tileY, out int levelOfDetail);
         uint relativeScale = TileSystem.MapSize(maxLevelOfDetail - levelOfDetail);
         //Console.WriteLine(tileX * (int)relativeScale - originX);
-        graphics.DrawImage(image, tileX * (int)relativeScale - originX, tileY * (int)relativeScale - originY, image.Width * (int)relativeScale, image.Height * (int)relativeScale);
+        graphics.DrawImage(image, tileX * relativeScale - originX, tileY * relativeScale - originY, image.Width * relativeScale / 256, image.Height * relativeScale / 256);
     }
 
     public Bitmap GetImage()
