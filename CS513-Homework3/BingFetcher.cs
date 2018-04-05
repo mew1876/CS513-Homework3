@@ -21,14 +21,14 @@ namespace CS513_Homework3
 
         static Bitmap GetImageInBB(double latitude1, double longitude1, double latitude2, double longitude2)
         {
-            Quilt quilt = new Quilt(latitude1, longitude1, latitude2, longitude2, 20);
+            Quilt quilt = new Quilt(latitude1, longitude1, latitude2, longitude2, 21);
             RecursivelyGetImageinBB(latitude1, longitude1, latitude2, longitude2, quilt, "");
             return quilt.GetImage();
         }
 
         static Bitmap GetImageInBBAsync(double latitude1, double longitude1, double latitude2, double longitude2)
         {
-            Quilt quilt = new Quilt(latitude1, longitude1, latitude2, longitude2, 20);
+            Quilt quilt = new Quilt(latitude1, longitude1, latitude2, longitude2, 21);
             Task drawQuilt = RecursivelyGetImageinBBAsync(latitude1, longitude1, latitude2, longitude2, quilt, "");
             drawQuilt.Wait();
             return quilt.GetImage();
@@ -71,7 +71,7 @@ namespace CS513_Homework3
                 Bitmap tileImage = GetTile("http://h0.ortho.tiles.virtualearth.net/tiles/a" + quadKey + ".jpeg?g=131");
                 if (tileImage == null)
                 {
-                    Console.WriteLine("\tImage for " + quadKey + " was null");
+                    //Console.WriteLine("\tImage for " + quadKey + " was null");
                     return;
                 }
                 targetQuilt.Add(tileImage, quadKey);
@@ -107,7 +107,8 @@ namespace CS513_Homework3
         {
             Bitmap image = null;
             HttpResponseMessage response = await client.GetAsync(URI);
-            if(response.IsSuccessStatusCode)
+            
+            if(!response.Headers.Contains("X-VE-Tile-Info"))
             {
                 byte[] bytes = await response.Content.ReadAsByteArrayAsync();
                 MemoryStream stream = new MemoryStream(bytes);
