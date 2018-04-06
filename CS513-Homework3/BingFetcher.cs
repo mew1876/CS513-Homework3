@@ -62,7 +62,7 @@ namespace CS513_Homework3
             // Bitmap image = GetImageInBBAsync(41.78, -87.7, 41.783, -87.705);
             // my absolute path = C:\Users\Julianna\Documents\Documents\Academic\CS 513 Windows\CS 513 Repository HW 3\CS513-Homework3
             Bitmap image = GetImageInBBAsync(quilt, minLatitudeInput, minLongitudeInput, maxLatitudeInput, maxLongitudeInput, maxLevelOfDetail);
-            image.Save(imagePath+"/test.png", ImageFormat.Png); 
+            image.Save(imagePath+"/BoundingBoxImage.png", ImageFormat.Png); 
         }
 
         static T GetUserInput<T>(string prompt)
