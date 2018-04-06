@@ -17,37 +17,51 @@ namespace CS513_Homework3
 
         static void Main(string[] args)
         {
-            double minLatitudeInput;
-            double minLongitudeInput;
-            double maxLatitudeInput;
-            double maxLongitudeInput;
-            int    maxLevelOfDetail; // between 1 and 23
+            double minLatitudeInput  = 0;
+            double minLongitudeInput = 0;
+            double maxLatitudeInput  = 0;
+            double maxLongitudeInput = 0;
+            int    maxLevelOfDetail  = 1; // between 1 and 23
             string imagePath         = "";
+            Quilt quilt;
 
             // get user input
             Console.WriteLine("Enter q for any input to quit.");
-            minLatitudeInput  = double.Parse(GetUserInput("Enter the minimum latitude value of the desired bounding box: ",  "double"), System.Globalization.CultureInfo.InvariantCulture);
-            minLongitudeInput = double.Parse(GetUserInput("Enter the minimum longitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
-            maxLatitudeInput  = double.Parse(GetUserInput("Enter the maximum latitude value of the desired bounding box: ",  "double"), System.Globalization.CultureInfo.InvariantCulture);
-            maxLongitudeInput = double.Parse(GetUserInput("Enter the maximum longitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
-            maxLevelOfDetail = int.Parse(GetUserInput("Enter the maximum level of detail (1-23): ", "int"));
+            while(true)
+            {
+                minLatitudeInput = double.Parse(GetUserInput("Enter the minimum latitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
+                minLongitudeInput = double.Parse(GetUserInput("Enter the minimum longitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
+                maxLatitudeInput = double.Parse(GetUserInput("Enter the maximum latitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
+                maxLongitudeInput = double.Parse(GetUserInput("Enter the maximum longitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
+                maxLevelOfDetail = int.Parse(GetUserInput("Enter the maximum level of detail (1-23): ", "int"));
+
+                // correct values before sending them to get bounding box
+                if (maxLevelOfDetail > 21)
+                {
+                    maxLevelOfDetail = 21;
+                }
+                else if (maxLevelOfDetail < 1)
+                {
+                    maxLevelOfDetail = 1;
+                }
+                TileSystem.Clip(minLatitudeInput, TileSystem.MinLatitude, TileSystem.MaxLatitude);
+                TileSystem.Clip(minLongitudeInput, TileSystem.MinLongitude, TileSystem.MaxLongitude);
+
+                try
+                {
+                    quilt = new Quilt(minLatitudeInput, minLongitudeInput, maxLatitudeInput, maxLongitudeInput, maxLevelOfDetail);
+                    break; 
+                }
+                catch (Exception)
+                {
+                    Console.WriteLine("Bounding Box invalid (too large or zero).");
+                }
+            }
             imagePath = GetUserInput("Enter the absolute path to the directory you would like the image saved in: ", "directory");
-
-            // correct values before sending them to get bounding box
-            if (maxLevelOfDetail > 21)
-            {
-                maxLevelOfDetail = 21;
-            }
-            else if(maxLevelOfDetail < 1)
-            {
-                maxLevelOfDetail = 1;
-            }
-            TileSystem.Clip(minLatitudeInput, TileSystem.MinLatitude, TileSystem.MaxLatitude);
-            TileSystem.Clip(minLongitudeInput, TileSystem.MinLongitude, TileSystem.MaxLongitude);
-
+            Console.WriteLine("Fetching images... (this may take some time)");
             // Bitmap image = GetImageInBBAsync(41.78, -87.7, 41.783, -87.705);
             // my absolute path = C:\Users\Julianna\Documents\Documents\Academic\CS 513 Windows\CS 513 Repository HW 3\CS513-Homework3
-            Bitmap image = GetImageInBBAsync(minLatitudeInput, minLongitudeInput, maxLatitudeInput, maxLongitudeInput, maxLevelOfDetail);
+            Bitmap image = GetImageInBBAsync(quilt, minLatitudeInput, minLongitudeInput, maxLatitudeInput, maxLongitudeInput, maxLevelOfDetail);
             image.Save(imagePath+"/test.png", ImageFormat.Png); 
         }
 
@@ -95,9 +109,8 @@ namespace CS513_Homework3
             return quilt.GetImage();
         }
 
-        static Bitmap GetImageInBBAsync(double latitude1, double longitude1, double latitude2, double longitude2, int maxLevelofDetail)
+        static Bitmap GetImageInBBAsync(Quilt quilt, double latitude1, double longitude1, double latitude2, double longitude2, int maxLevelofDetail)
         {
-            Quilt quilt = new Quilt(latitude1, longitude1, latitude2, longitude2, maxLevelofDetail);
             Task drawQuilt = RecursivelyGetImageinBBAsync(latitude1, longitude1, latitude2, longitude2, quilt, "");
             drawQuilt.Wait();
             return quilt.GetImage();
