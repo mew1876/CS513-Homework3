@@ -12,10 +12,10 @@ namespace Microsoft.MapPoint
     static class TileSystem
     {
         private const double EarthRadius = 6378137;
-        private const double MinLatitude = -85.05112878;
-        private const double MaxLatitude = 85.05112878;
-        private const double MinLongitude = -180;
-        private const double MaxLongitude = 180;
+        public const double MinLatitude = -85.05112878;
+        public const double MaxLatitude = 85.05112878;
+        public const double MinLongitude = -180;
+        public const double MaxLongitude = 180;
 
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Microsoft.MapPoint
         /// <param name="minValue">Minimum allowable value.</param>
         /// <param name="maxValue">Maximum allowable value.</param>
         /// <returns>The clipped value.</returns>
-        private static double Clip(double n, double minValue, double maxValue)
+        public static double Clip(double n, double minValue, double maxValue)
         {
             return Math.Min(Math.Max(n, minValue), maxValue);
         }
