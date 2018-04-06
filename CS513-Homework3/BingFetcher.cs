@@ -26,12 +26,19 @@ namespace CS513_Homework3
 
             // get user input
             Console.WriteLine("Enter q for any input to quit.");
-            minLatitudeInput  = double.Parse(GetUserInput("Enter the minimum latitude value of the desired bounding box: ",  "double"), System.Globalization.CultureInfo.InvariantCulture);
-            minLongitudeInput = double.Parse(GetUserInput("Enter the minimum longitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
-            maxLatitudeInput  = double.Parse(GetUserInput("Enter the maximum latitude value of the desired bounding box: ",  "double"), System.Globalization.CultureInfo.InvariantCulture);
-            maxLongitudeInput = double.Parse(GetUserInput("Enter the maximum longitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
-            maxLevelOfDetail = int.Parse(GetUserInput("Enter the maximum level of detail (1-23): ", "int"));
-            imagePath = GetUserInput("Enter the absolute path to the directory you would like the image saved in: ", "directory");
+            //minLatitudeInput  = double.Parse(GetUserInput("Enter the minimum latitude value of the desired bounding box: ",  "double"), System.Globalization.CultureInfo.InvariantCulture);
+            //minLongitudeInput = double.Parse(GetUserInput("Enter the minimum longitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
+            //maxLatitudeInput  = double.Parse(GetUserInput("Enter the maximum latitude value of the desired bounding box: ",  "double"), System.Globalization.CultureInfo.InvariantCulture);
+            //maxLongitudeInput = double.Parse(GetUserInput("Enter the maximum longitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
+            //maxLevelOfDetail = int.Parse(GetUserInput("Enter the maximum level of detail (1-23): ", "int"));
+            //imagePath = GetUserInput("Enter the absolute path to the directory you would like the image saved in: ", "directory");
+
+            minLatitudeInput = GetUserInput<double>("Enter the minimum latitude value of the desired bounding box: ");
+            minLongitudeInput = GetUserInput<double>("Enter the minimum longitude value of the desired bounding box: ");
+            maxLatitudeInput = GetUserInput<double>("Enter the maximum latitude value of the desired bounding box: ");
+            maxLongitudeInput = GetUserInput<double>("Enter the maximum longitude value of the desired bounding box: ");
+            maxLevelOfDetail = GetUserInput<int>("Enter the maximum level of detail (1-23): ");
+            imagePath = GetUserInput<string>("Enter the absolute path to the directory you would like the image saved in: ");
 
             // correct values before sending them to get bounding box
             if (maxLevelOfDetail > 21)
@@ -49,6 +56,30 @@ namespace CS513_Homework3
             // my absolute path = C:\Users\Julianna\Documents\Documents\Academic\CS 513 Windows\CS 513 Repository HW 3\CS513-Homework3
             Bitmap image = GetImageInBBAsync(minLatitudeInput, minLongitudeInput, maxLatitudeInput, maxLongitudeInput, maxLevelOfDetail);
             image.Save(imagePath+"/test.png", ImageFormat.Png); 
+        }
+
+        static T GetUserInput<T>(string prompt)
+        {
+            T input = default(T);
+            while(true)
+            {
+                try
+                {
+                    Console.WriteLine(prompt);
+                    string inputString = Console.ReadLine().Trim();
+                    if(inputString == "q")
+                    {
+                        Environment.Exit(0);
+                    }
+                    input = (T)Convert.ChangeType(inputString, typeof(T));
+                    break;
+                }
+                catch(Exception)
+                {
+                    Console.WriteLine("Invalid input please try again");
+                }
+            }
+            return input;
         }
 
         static string GetUserInput(string prompt, string type)
@@ -88,47 +119,12 @@ namespace CS513_Homework3
             return inputString;
         }
 
-        static Bitmap GetImageInBB(double latitude1, double longitude1, double latitude2, double longitude2, int maxLevelofDetail)
-        {
-            Quilt quilt = new Quilt(latitude1, longitude1, latitude2, longitude2, maxLevelofDetail);
-            RecursivelyGetImageinBB(latitude1, longitude1, latitude2, longitude2, quilt, "");
-            return quilt.GetImage();
-        }
-
         static Bitmap GetImageInBBAsync(double latitude1, double longitude1, double latitude2, double longitude2, int maxLevelofDetail)
         {
             Quilt quilt = new Quilt(latitude1, longitude1, latitude2, longitude2, maxLevelofDetail);
             Task drawQuilt = RecursivelyGetImageinBBAsync(latitude1, longitude1, latitude2, longitude2, quilt, "");
             drawQuilt.Wait();
             return quilt.GetImage();
-        }
-
-        static void RecursivelyGetImageinBB(double latitude1, double longitude1, double latitude2, double longitude2, Quilt targetQuilt, string quadKey)
-        {
-            int levelOfDetail = quadKey.Length;
-            if (levelOfDetail > 0)
-            {
-                //Console.WriteLine("Downloading image " + quadKey);
-                Bitmap tileImage = GetTile("http://h0.ortho.tiles.virtualearth.net/tiles/a" + quadKey + ".jpeg?g=131");
-                if (tileImage == null)
-                {
-                    return;
-                }
-                targetQuilt.Add(tileImage, quadKey);
-                if (levelOfDetail >= targetQuilt.getMaxLevelOfDetail())
-                {
-                    return;
-                }
-            }
-            levelOfDetail++;
-
-            foreach (char d in "0123")
-            {
-                if (DoesQuadTouchBB(latitude1, longitude1, latitude2, longitude2, quadKey + d))
-                {
-                    RecursivelyGetImageinBB(latitude1, longitude1, latitude2, longitude2, targetQuilt, quadKey + d);
-                }
-            }
         }
 
         static async Task RecursivelyGetImageinBBAsync(double latitude1, double longitude1, double latitude2, double longitude2, Quilt targetQuilt, string quadKey)
