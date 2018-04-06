@@ -29,30 +29,23 @@ namespace CS513_Homework3
             Console.WriteLine("Enter q for any input to quit.");
             while(true)
             {
-                minLatitudeInput = double.Parse(GetUserInput("Enter the minimum latitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
-                minLongitudeInput = double.Parse(GetUserInput("Enter the minimum longitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
-                maxLatitudeInput = double.Parse(GetUserInput("Enter the maximum latitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
-                maxLongitudeInput = double.Parse(GetUserInput("Enter the maximum longitude value of the desired bounding box: ", "double"), System.Globalization.CultureInfo.InvariantCulture);
-                maxLevelOfDetail = int.Parse(GetUserInput("Enter the maximum level of detail (1-23): ", "int"));
+                minLatitudeInput  = GetUserInput<double>("Enter the minimum latitude value of the desired bounding box: ");
+                minLongitudeInput = GetUserInput<double>("Enter the minimum longitude value of the desired bounding box: ");
+                maxLatitudeInput  = GetUserInput<double>("Enter the maximum latitude value of the desired bounding box: ");
+                maxLongitudeInput = GetUserInput<double>("Enter the maximum longitude value of the desired bounding box: ");
+                maxLevelOfDetail  = GetUserInput<int>("Enter the maximum level of detail (1-23): ");
 
-            minLatitudeInput = GetUserInput<double>("Enter the minimum latitude value of the desired bounding box: ");
-            minLongitudeInput = GetUserInput<double>("Enter the minimum longitude value of the desired bounding box: ");
-            maxLatitudeInput = GetUserInput<double>("Enter the maximum latitude value of the desired bounding box: ");
-            maxLongitudeInput = GetUserInput<double>("Enter the maximum longitude value of the desired bounding box: ");
-            maxLevelOfDetail = GetUserInput<int>("Enter the maximum level of detail (1-23): ");
-            imagePath = GetUserInput<string>("Enter the absolute path to the directory you would like the image saved in: ");
-
-            // correct values before sending them to get bounding box
-            if (maxLevelOfDetail > 21)
-            {
-                maxLevelOfDetail = 21;
-            }
-            else if(maxLevelOfDetail < 1)
-            {
-                maxLevelOfDetail = 1;
-            }
-            TileSystem.Clip(minLatitudeInput, TileSystem.MinLatitude, TileSystem.MaxLatitude);
-            TileSystem.Clip(minLongitudeInput, TileSystem.MinLongitude, TileSystem.MaxLongitude);
+                // correct values before sending them to get bounding box
+                if (maxLevelOfDetail > 21)
+                {
+                    maxLevelOfDetail = 21;
+                }
+                else if(maxLevelOfDetail < 1)
+                {
+                    maxLevelOfDetail = 1;
+                }
+                TileSystem.Clip(minLatitudeInput, TileSystem.MinLatitude, TileSystem.MaxLatitude);
+                TileSystem.Clip(minLongitudeInput, TileSystem.MinLongitude, TileSystem.MaxLongitude);
 
                 try
                 {
@@ -64,7 +57,7 @@ namespace CS513_Homework3
                     Console.WriteLine("Bounding Box invalid (too large or zero).");
                 }
             }
-            imagePath = GetUserInput("Enter the absolute path to the directory you would like the image saved in: ", "directory");
+            imagePath = GetUserInput<string>("Enter the absolute path to the directory you would like the image saved in: ");
             Console.WriteLine("Fetching images... (this may take some time)");
             // Bitmap image = GetImageInBBAsync(41.78, -87.7, 41.783, -87.705);
             // my absolute path = C:\Users\Julianna\Documents\Documents\Academic\CS 513 Windows\CS 513 Repository HW 3\CS513-Homework3
@@ -94,50 +87,6 @@ namespace CS513_Homework3
                 }
             }
             return input;
-        }
-
-        static string GetUserInput(string prompt, string type)
-        {
-            string inputString = "";
-            bool validInput = false;
-            while (validInput == false)
-            {
-                Console.WriteLine(prompt);
-                inputString = Console.ReadLine().Trim();
-                if (inputString == "q")
-                {
-                    Console.WriteLine("Quitting");
-                    Environment.Exit(0);
-                }
-                if (type == "double")
-                {
-                    validInput = double.TryParse(inputString, out double inputFloat);
-                }
-                else if(type == "int")
-                {
-                    validInput = int.TryParse(inputString, out int inputInt);
-                }
-                else if (type == "directory")
-                {
-                    validInput = Directory.Exists(inputString);
-                }
-                else
-                {
-                    throw new ArgumentException("Invalid target type given");
-                }
-                if(validInput == false)
-                {
-                    Console.WriteLine("Invalid input. Try again.");
-                }
-            }
-            return inputString;
-        }
-
-        static Bitmap GetImageInBB(double latitude1, double longitude1, double latitude2, double longitude2, int maxLevelofDetail)
-        {
-            Quilt quilt = new Quilt(latitude1, longitude1, latitude2, longitude2, maxLevelofDetail);
-            RecursivelyGetImageinBB(latitude1, longitude1, latitude2, longitude2, quilt, "");
-            return quilt.GetImage();
         }
 
         static Bitmap GetImageInBBAsync(Quilt quilt, double latitude1, double longitude1, double latitude2, double longitude2, int maxLevelofDetail)
